@@ -1,0 +1,392 @@
+library(shiny)
+library(shinydashboard)
+library(ggplot2)
+library(dplyr)
+library(leaflet)
+require(tidyverse)
+require(DT)
+require(leaflet)
+library(leaflet.extras)
+library(readxl)
+library(data.table)
+library(shinythemes) 
+
+
+base_movicovid <- read_excel("05_03_rutas_mapacovid_merge.xlsx")
+cluster0<- base_movicovid %>% 
+  filter(cluster_kmeans=="C0")
+
+cluster1<- base_movicovid %>% 
+  filter(cluster_kmeans=="C1")
+cluster2<- base_movicovid %>% 
+  filter(cluster_kmeans=="C2")
+cluster3<- base_movicovid %>% 
+  filter(cluster_kmeans=="C3")
+cluster4<- base_movicovid %>% 
+  filter(cluster_kmeans=="C4")
+clusterNA<- base_movicovid %>% 
+  filter(cluster_kmeans=="NA")
+
+
+popup_o <- paste0("<b>", "Entidad: ", "</b>", as.character(base_movicovid$NOM_ENT_origen), 
+                  "<br>", "<b>", "Municipio: ", "</b>", as.character(base_movicovid$mun_o), "<br>", 
+                  "<b>", "Colonia: ", "</b>", as.character(base_movicovid$col_o), "<br>",
+                  "<b>", "Cluster: ", "</b>", as.character(base_movicovid$cluster_kmeans), "<br>",
+                  "<b>", "Subluster: ", "</b>", as.character(base_movicovid$subcluster), "<br>",
+                  "<b>", "Descripción: ", "</b>", as.character(base_movicovid$Descripcion),"<br>",
+                  "<b>", "Descripción: ", "</b>", as.character(base_movicovid$ruta_o),"<br>")
+
+popup_d <- paste0("<b>", "Entidad: ", "</b>", as.character(base_movicovid$NOM_ENT_desti), 
+                  "<br>", "<b>", "Municipio: ", "</b>", as.character(base_movicovid$mun_d), "<br>", 
+                  "<b>", "Colonia: ", "</b>", as.character(base_movicovid$col_d), "<br>",
+                  "<b>", "Cluster: ", "</b>", as.character(base_movicovid$cluster_kmeans), "<br>",
+                  "<b>", "Subluster: ", "</b>", as.character(base_movicovid$subcluster), "<br>",
+                  "<b>", "Descripción: ", "</b>", as.character(base_movicovid$Descripcion),"<br>",
+                  "<b>", "Descripción: ", "</b>", as.character(base_movicovid$ruta_d),"<br>")
+
+popup <- paste0("<b>", "Entidad: ", "</b>", as.character(cluster0$NOM_ENT_origen), 
+                   "<br>", "<b>", "Municipio: ", "</b>", as.character(cluster0$mun_o), "<br>", 
+                   "<b>", "Colonia: ", "</b>", as.character(cluster0$col_o), "<br>",
+                   "<b>", "Cluster: ", "</b>", as.character(cluster0$cluster_kmeans), "<br>",
+                   "<b>", "Subluster: ", "</b>", as.character(cluster0$subcluster), "<br>",
+                   "<b>", "Descripción: ", "</b>", as.character(cluster0$Descripcion),"<br>",
+                   "<b>", "Ruta: ", "</b>", as.character(cluster0$ruta_o),"<br>")
+
+popup_c0 <- paste0("<b>", "Entidad: ", "</b>", as.character(cluster0$NOM_ENT_origen), 
+                   "<br>", "<b>", "Municipio: ", "</b>", as.character(cluster0$mun_o), "<br>", 
+                   "<b>", "Colonia: ", "</b>", as.character(cluster0$col_o), "<br>",
+                   "<b>", "Cluster: ", "</b>", as.character(cluster0$cluster_kmeans), "<br>",
+                   "<b>", "Subluster: ", "</b>", as.character(cluster0$subcluster), "<br>",
+                   "<b>", "Descripción: ", "</b>", as.character(cluster0$Descripcion),"<br>",
+                   "<b>", "Ruta: ", "</b>", as.character(cluster0$ruta_o),"<br>")
+
+popup_c1 <- paste0("<b>", "Entidad: ", "</b>", as.character(cluster1$NOM_ENT_origen), 
+                   "<br>", "<b>", "Municipio: ", "</b>", as.character(cluster1$mun_o), "<br>", 
+                   "<b>", "Colonia: ", "</b>", as.character(cluster1$col_o), "<br>",
+                   "<b>", "Cluster: ", "</b>", as.character(cluster1$cluster_kmeans), "<br>",
+                   "<b>", "Subluster: ", "</b>", as.character(cluster1$subcluster), "<br>",
+                   "<b>", "Descripción: ", "</b>", as.character(cluster1$Descripcion),"<br>",
+                   "<b>", "Ruta: ", "</b>", as.character(cluster1$ruta_o),"<br>")
+
+popup_c2 <- paste0("<b>", "Entidad: ", "</b>", as.character(cluster2$NOM_ENT_origen), 
+                   "<br>", "<b>", "Municipio: ", "</b>", as.character(cluster2$mun_o), "<br>", 
+                   "<b>", "Colonia: ", "</b>", as.character(cluster2$col_o), "<br>",
+                   "<b>", "Cluster: ", "</b>", as.character(cluster2$cluster_kmeans), "<br>",
+                   "<b>", "Subluster: ", "</b>", as.character(cluster2$subcluster), "<br>",
+                   "<b>", "Descripción: ", "</b>", as.character(cluster2$Descripcion),"<br>",
+                   "<b>", "Ruta: ", "</b>", as.character(cluster2$ruta_o),"<br>")
+
+popup_c3 <- paste0("<b>", "Entidad: ", "</b>", as.character(cluster3$NOM_ENT_origen), 
+                   "<br>", "<b>", "Municipio: ", "</b>", as.character(cluster3$mun_o), "<br>", 
+                   "<b>", "Colonia: ", "</b>", as.character(cluster3$col_o), "<br>",
+                   "<b>", "Cluster: ", "</b>", as.character(cluster3$cluster_kmeans), "<br>",
+                   "<b>", "Subluster: ", "</b>", as.character(cluster3$subcluster), "<br>",
+                   "<b>", "Descripción: ", "</b>", as.character(cluster3$Descripcion),"<br>",
+                   "<b>", "Ruta: ", "</b>", as.character(cluster3$ruta_o),"<br>")
+
+popup_c4 <- paste0("<b>", "Entidad: ", "</b>", as.character(cluster4$NOM_ENT_origen), 
+                   "<br>", "<b>", "Municipio: ", "</b>", as.character(cluster4$mun_o), "<br>", 
+                   "<b>", "Colonia: ", "</b>", as.character(cluster4$col_o), "<br>",
+                   "<b>", "Cluster: ", "</b>", as.character(cluster4$cluster_kmeans), "<br>",
+                   "<b>", "Subluster: ", "</b>", as.character(cluster4$subcluster), "<br>",
+                   "<b>", "Descripción: ", "</b>", as.character(cluster4$Descripcion),"<br>",
+                   "<b>", "Ruta: ", "</b>", as.character(cluster4$ruta_o),"<br>")
+
+popup_na <- paste0("<b>", "Entidad: ", "</b>", as.character(clusterNA$NOM_ENT_origen), 
+                   "<br>", "<b>", "Municipio: ", "</b>", as.character(clusterNA$mun_o), "<br>", 
+                   "<b>", "Colonia: ", "</b>", as.character(clusterNA$col_o), "<br>",
+                   "<b>", "Cluster: ", "</b>", as.character(clusterNA$cluster_kmeans), "<br>",
+                   "<b>", "Subluster: ", "</b>", as.character(clusterNA$subcluster), "<br>",
+                   "<b>", "Descripción: ", "</b>", as.character(clusterNA$Descripcion),"<br>",
+                   "<b>", "Ruta: ", "</b>", as.character(clusterNA$ruta_o),"<br>")
+
+palPwr <- leaflet::colorFactor(palette = c("C0" = "#1b9e77",
+                                             "C1" = "#d95f02",
+                                             "C2" = "#7570b3",
+                                             "C3" = "#e7298a",
+                                             "C4" = "#66a61e",
+                                             "NA" = "#e6ab02"), 
+                                 domain = base_movicovid$cluster_kmeans)
+
+
+colour_c = c("#1b9e77", "#d95f02", "#7570b3", "#e7298a", "#66a61e", "#e6ab02")
+
+group = c("C0", "C1", "C2", "C3", "C4", "NA")
+
+
+ui <- navbarPage(
+  title ="MAPACOVID",
+  theme = shinytheme("flatly"),
+  tabsetPanel(
+    tabPanel("Mapa",
+             sidebarLayout(
+               sidebarPanel("Seleccione algunas características para las rutas de origen y destino.
+                            ",
+                            selectInput(
+                              inputId = "entidad_o", 
+                              label = "Entidad de origen", 
+                              choices = sort(unique(base_movicovid$NOM_ENT_origen)),
+                              multiple = TRUE
+                            ),
+                            
+                            selectInput(
+                              inputId = "municipio_o",
+                              label = "Municipio de origen", 
+                              choices = sort(unique(base_movicovid$mun_o)),
+                              multiple = TRUE
+                            ),
+                            selectInput(
+                              inputId = "colonia_o",
+                              label = "Colonia de origen", 
+                              choices = sort(unique(base_movicovid$col_o)),
+                              multiple = TRUE
+                            ),
+                            selectInput(inputId = "cluster", 
+                                        label = "Cluster", 
+                                        choices = sort(unique(base_movicovid$cluster_kmeans)),
+                                        multiple = TRUE
+                            ),
+                            selectInput(inputId = "subcluster", 
+                                        label = "Subcluster", 
+                                        choices = sort(unique(base_movicovid$subcluster)),
+                                        multiple = TRUE
+                            ),
+                            
+                            selectInput(
+                              inputId = "entidad_d", 
+                              label = "Entidad de destino", 
+                              choices = sort(unique(base_movicovid$NOM_ENT_desti)), 
+                              multiple = TRUE
+                            ),
+                            
+                            selectInput(
+                              inputId = "municipio_d",
+                              label = "Municipio de destino", 
+                              choices = sort(unique(base_movicovid$mun_d)),
+                              multiple = TRUE
+                            ),
+                            selectInput(
+                              inputId = "colonia_d",
+                              label = "Colonia de destino", 
+                              choices = sort(unique(base_movicovid$col_d)),
+                              multiple = TRUE
+                            ),
+                            actionButton("execute", label = "Buscar rutas", icon("fas fa-search-location"), 
+                                         style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+               ),
+               
+               mainPanel(leafletOutput(outputId = "mapa1", height = 700),
+                       (dataTableOutput(outputId = "my_datatable",height = 600, width = 1350)))
+    ))
+    ,tabPanel('Base de datos',
+              dataTableOutput(outputId = "datatable")
+    )
+  )
+)
+
+
+
+server <- function(input, output, session) {
+
+  #diseño de filtros
+  output$ent_o <- renderUI({
+    selectInput("entidad_o",
+                label =  "Selecciona la entidad",
+                choices = sort(unique(base_movicovid$NOM_ENT)),
+                multiple = T
+    )
+  })
+  
+  output$mun_o <- renderUI({
+    selectInput("municipio_o",
+                label =  "Selecciona un municipio",
+                choices = sort(unique(base_movicovid$NOM_MUN_origen)),
+                multiple = T
+    )
+  })
+  
+  output$cols_o <- renderUI({
+    selectInput("colonia_o",
+                label =  "Selecciona una colonia",
+                choices = sort(unique(base_movicovid$col_o)),
+                multiple = T
+    )
+  })
+  
+  output$clus <- renderUI({
+    selectInput("cluster",
+                label =  "Selecciona un clúster",
+                choices = sort(unique(base_movicovid$cluster_kmeans)),
+                multiple = T
+    )
+  })
+  
+  
+  output$subclus <- renderUI({
+    selectInput("subcluster",
+                label =  "Selecciona un clúster",
+                choices = sort(unique(base_movicovid$subcluster)),
+                multiple = T
+    )
+  })
+  
+  output$ent_d <- renderUI({
+    selectInput("entidad_d",
+                label =  "Selecciona la entidad",
+                choices = sort(unique(base_movicovid$NOM_ENT_desti)),
+                multiple = T
+    )
+  })
+  
+  output$mun_d <- renderUI({
+    selectInput("municipio_d",
+                label =  "Selecciona la entidad",
+                choices = sort(unique(base_movicovid$mun_d)),
+                multiple = T
+    )
+  })
+  
+  output$cols_d <- renderUI({
+    selectInput("colonia_d",
+                label =  "Selecciona la entidad",
+                choices = sort(unique(base_movicovid$col_d)),
+                multiple = T
+    )
+  })
+  
+  
+  baloo <- reactive({
+    
+    
+    base_movicovid %>%
+      filter(if(!is.null(input$entidad_o))  NOM_ENT_origen %in% input$entidad_o      else NOM_ENT_origen != "",
+             if(!is.null(input$municipio_o))         mun_o %in% input$municipio_o    else mun_o != "",
+             if(!is.null(input$colonia_o))           col_o %in% input$colonia_o      else col_o != "",
+             if(!is.null(input$cluster))    cluster_kmeans %in% input$cluster        else cluster_kmeans != "",
+             if(!is.null(input$subcluster))     subcluster %in% input$subcluster     else subcluster != "") %>% 
+      filter(if(!is.null(input$entidad_d))   NOM_ENT_desti %in% input$entidad_d      else NOM_ENT_desti != "",
+             if(!is.null(input$municipio_d))         mun_d %in% input$municipio_d    else mun_d != "",
+             if(!is.null(input$colonia_d))           col_d %in% input$colonia_d      else col_d != "" )
+    
+  })
+
+    output$my_datatable <- DT::renderDataTable({
+    DT::datatable(baloo())
+  })
+  
+  output$datatable <- DT::renderDataTable({
+    DT::datatable(baloo())
+  })
+  
+  
+  
+  output$mapa1 <- renderLeaflet({
+    mapa_filtered <- baloo()
+    
+    leaflet(mapa_filtered) %>%
+      addProviderTiles("OpenStreetMap") %>%
+      
+      addCircleMarkers(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C0",],
+                       lng=~long_o, lat=~lat_o,
+                       radius = 5,
+                       fillOpacity = 1,
+                       stroke = FALSE,
+                       popup = popup_c0,
+                       color = "#1b9e77") %>%
+
+      addCircleMarkers(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C1",],
+                       lng=~long_o, lat=~lat_o,
+                       radius = 5,
+                       fillOpacity = 1,
+                       stroke = FALSE,
+                       popup = popup_c1,
+                       color = "#d95f02") %>%
+      
+      addCircleMarkers(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C2",],
+                       lng=~long_o, lat=~lat_o,
+                       radius = 5,
+                       fillOpacity = 1,
+                       stroke = FALSE,
+                       popup = popup_c2,
+                       color = "#7570b3") %>%
+      
+      addCircleMarkers(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C3",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   radius = 5,
+                   fillOpacity = 1,
+                   stroke = FALSE,
+                   popup = popup_c3,
+                   color = "#e7298a") %>% 
+      
+      addCircleMarkers(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C4",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   radius = 5,
+                   fillOpacity = 1,
+                   stroke = FALSE,
+                   color = "#66a61e") %>% 
+      
+      addCircleMarkers(data = mapa_filtered[mapa_filtered$cluster_kmeans=="NA",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   radius = 5,
+                   fillOpacity = 1,
+                   stroke = FALSE,
+                   popup = popup_na,
+                   color = "#e6ab02") %>% 
+      
+      #  polylines
+      addPolylines(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C0",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   weight = 4,
+                   popup = popup,
+                   color = "#1b9e77") %>%
+      
+      addPolylines(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C1",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   weight = 4,
+                   popup = popup,
+                   color = "#d95f02") %>% 
+      
+      addPolylines(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C2",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   weight = 4,
+                   popup = popup,
+                   color = "#7570b3") %>% 
+      addPolylines(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C3",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   weight = 4,
+                   popup = popup,
+                   color = "#e7298a") %>% 
+      addPolylines(data = mapa_filtered[mapa_filtered$cluster_kmeans=="C4",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   weight = 4,
+                   popup = popup,
+                   color ="#66a61e") %>% 
+      addPolylines(data = mapa_filtered[mapa_filtered$cluster_kmeans=="NA",],
+                   group = group,
+                   ~long_o, ~lat_o,
+                   weight = 4,
+                   popup = popup,
+                   color = "#e6ab02") %>% 
+      
+      addLegend(position = "bottomright",
+                values = mapa_filtered$cluster_kmeans,
+                opacity = 1,
+                color = c("#1b9e77", "#d95f02", "#7570b3", "#e7298a", "#66a61e", "#e6ab02"),
+                labels= c("C0", "C1", "C2","C3","C4","NA"),
+                title = "Cluster") %>%
+      addResetMapButton() %>%
+      addDrawToolbar() %>%
+      addStyleEditor()
+  })
+
+}
+
+shinyApp(ui = ui, server = server)
